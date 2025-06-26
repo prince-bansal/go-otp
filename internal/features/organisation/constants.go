@@ -19,7 +19,7 @@ var Organisations = []domain.OrganisationD{
 		Id:        "2",
 		Name:      "Organisation 2",
 		Email:     "org2@mail.com",
-		Package:   models.GOLD,
+		Package:   models.PLATINUM,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	},
