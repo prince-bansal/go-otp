@@ -3,6 +3,7 @@ package organisation
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/prince-bansal/go-otp/internal/features/organisation/domain"
+	"github.com/prince-bansal/go-otp/internal/utils"
 )
 
 type OrganisationHandler struct {
@@ -30,25 +31,40 @@ func (h *OrganisationHandler) createOrganisation(ctx *gin.Context) {
 
 	err := ctx.ShouldBindJSON(&req)
 	if err != nil {
-		ctx.JSON(400, gin.H{
-			"error":     "Invalid Request",
-			"errorType": "Validation Error",
-		})
+		ctx.JSON(400, Response.SendValidationError(err))
 		return
 	}
 
-	records := h.organisationService.Register(ctx, req)
-	ctx.JSON(201, records)
+	err = req.Validate()
+	if err != nil {
+		ctx.JSON(400, Response.SendValidationError(err))
+		return
+	}
+
+	record, err := h.organisationService.Register(ctx, req)
+	if err != nil {
+		ctx.JSON(400, Response.SendError("getting error creating organisation", err))
+		return
+	}
+	ctx.JSON(201, record)
 }
 
 func (h *OrganisationHandler) getAll(ctx *gin.Context) {
-	records := h.organisationService.GetAll(ctx)
-	ctx.JSON(201, records)
+	records, err := h.organisationService.GetAll(ctx)
+	if err != nil {
+		ctx.JSON(400, Response.SendError("getting error creating organisation", err))
+		return
+	}
+	ctx.JSON(200, records)
 }
 
 func (h *OrganisationHandler) getOne(ctx *gin.Context) {
 	// todo: validate id
 	id := ctx.Param("id")
-	records := h.organisationService.GetOne(ctx, id)
-	ctx.JSON(201, records)
+	record, err := h.organisationService.GetOne(ctx, id)
+	if err != nil {
+		ctx.JSON(400, Response.SendError("cannot find organisation with id", err))
+		return
+	}
+	ctx.JSON(200, record)
 }
