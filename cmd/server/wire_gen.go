@@ -8,6 +8,7 @@ package main
 
 import (
 	"github.com/prince-bansal/go-otp/config"
+	"github.com/prince-bansal/go-otp/internal/features/apiKey"
 	"github.com/prince-bansal/go-otp/internal/features/health"
 	"github.com/prince-bansal/go-otp/internal/features/organisation"
 	"github.com/prince-bansal/go-otp/internal/routes"
@@ -19,7 +20,9 @@ func InitDependencies() *config.AppConfig {
 	organisationService := organisation.NewOrganisationService()
 	organisationHandler := organisation.NewOrganisationHandler(organisationService)
 	healthHandler := health.NewHealthHandler()
-	router := routes.NewRouter(organisationHandler, healthHandler)
+	apiService := apiKey.NewApiService()
+	apiKeyHandler := apiKey.NewApiHandler(apiService)
+	router := routes.NewRouter(organisationHandler, healthHandler, apiKeyHandler)
 	appConfig := config.NewAppConfig(router)
 	return appConfig
 }
