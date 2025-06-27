@@ -23,7 +23,6 @@ func (h *OrganisationHandler) InitRoutes(router *gin.Engine) {
 		routes.GET("/:id", h.getOne)
 		routes.POST("/", h.createOrganisation)
 	}
-
 }
 
 func (h *OrganisationHandler) createOrganisation(ctx *gin.Context) {
