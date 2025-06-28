@@ -1,10 +1,10 @@
 
 app:
   port: 8080
-
+  environment: development
 
 db:
-  host: localhost
+  host: 127.0.0.1:3306
   database: go_otp
   user: root
   password: root

@@ -1,0 +1,1 @@
+ALTER TABLE organisations ADD COLUMN package VARCHAR(255)
