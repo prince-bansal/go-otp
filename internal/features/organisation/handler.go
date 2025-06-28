@@ -40,7 +40,12 @@ func (h *OrganisationHandler) createOrganisation(ctx *gin.Context) {
 		return
 	}
 
-	record, err := h.organisationService.Register(ctx, req)
+	data := &domain.OrganisationD{
+		Name:  req.Name,
+		Email: req.Email,
+	}
+
+	record, err := h.organisationService.Register(ctx, data)
 	if err != nil {
 		ctx.JSON(400, Response.SendError("getting error creating organisation", err))
 		return

@@ -2,44 +2,61 @@ package organisation
 
 import (
 	"context"
-	"fmt"
 	"github.com/prince-bansal/go-otp/internal/features/organisation/domain"
 	"github.com/prince-bansal/go-otp/models"
-	"time"
+	"github.com/prince-bansal/go-otp/store/db"
+	"gorm.io/gorm"
 )
 
 type OrganisationRepository interface {
-	GetAll(ctx context.Context) (*[]domain.OrganisationD, error)
+	GetAll(ctx context.Context) ([]*domain.OrganisationD, error)
 	GetOne(ctx context.Context, id string) (*domain.OrganisationD, error)
-	Register(ctx context.Context, request domain.OrganisationRequest) (*domain.OrganisationD, error)
+	Register(ctx context.Context, request *domain.OrganisationD) (*domain.OrganisationD, error)
 }
 
 type OrganisationRepositoryImpl struct {
+	db *gorm.DB
 }
 
-func NewOrganisationRepository() OrganisationRepository {
-	return &OrganisationRepositoryImpl{}
+func NewOrganisationRepository(store *db.Store) OrganisationRepository {
+	return &OrganisationRepositoryImpl{
+		db: store.Db,
+	}
 }
 
-func (r *OrganisationRepositoryImpl) GetAll(ctx context.Context) (*[]domain.OrganisationD, error) {
-	return &Organisations, nil
+func (r *OrganisationRepositoryImpl) GetAll(ctx context.Context) ([]*domain.OrganisationD, error) {
+	var records []models.Organisation
+	if err := r.
+		db.
+		WithContext(ctx).
+		Find(&records).Error; err != nil {
+		return nil, err
+	}
+
+	var processedRecords []*domain.OrganisationD
+	for _, m := range records {
+		processedRecords = append(processedRecords, m.ToDomain())
+	}
+	return processedRecords, nil
 }
 
 func (r *OrganisationRepositoryImpl) GetOne(ctx context.Context, id string) (*domain.OrganisationD, error) {
-	println("organisation>>>>", len(Organisations))
-	return &Organisations[0], nil
+	var model models.Organisation
+	if err := r.db.
+		WithContext(ctx).
+		First(&model, id).Error; err != nil {
+		return nil, err
+	}
+	return model.ToDomain(), nil
 }
 
-func (r *OrganisationRepositoryImpl) Register(ctx context.Context, request domain.OrganisationRequest) (*domain.OrganisationD, error) {
-	id := len(Organisations) + 1
-	newOrg := domain.OrganisationD{
-		Id:        fmt.Sprintf("%d", id),
-		Name:      fmt.Sprintf("Organisation %d", id),
-		Email:     fmt.Sprintf("org%d@email.com", id),
-		Package:   models.SILVER,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+func (r *OrganisationRepositoryImpl) Register(ctx context.Context, request *domain.OrganisationD) (*domain.OrganisationD, error) {
+	var model models.Organisation
+	model.FromDomain(request)
+
+	if err := r.db.WithContext(ctx).Create(&model).Error; err != nil {
+		return nil, err
 	}
-	Organisations = append(Organisations, newOrg)
-	return &newOrg, nil
+
+	return model.ToDomain(), nil
 }

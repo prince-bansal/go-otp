@@ -17,27 +17,17 @@ import (
 var db *gorm.DB
 
 type Store struct {
-	config *config.Config
+	Config *config.Config
+	Db     *gorm.DB
 }
 
 func NewStore(config *config.Config) *Store {
-	return &Store{
-		config: config,
-	}
-}
-
-func (s *Store) InitDb() *gorm.DB {
-	if db != nil {
-		return db
-	}
-
-	c := s.config
-
+	c := config.Db
 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local&multiStatements=true",
-		c.Db.User,
-		c.Db.Password,
-		c.Db.Host,
-		c.Db.Database,
+		c.User,
+		c.Password,
+		c.Host,
+		c.Database,
 	)
 
 	dbInstance, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
@@ -49,11 +39,14 @@ func (s *Store) InitDb() *gorm.DB {
 		fmt.Println("connected with db")
 	}
 	db = dbInstance
-	return dbInstance
+	return &Store{
+		Config: config,
+		Db:     db,
+	}
 }
 
 func (s *Store) Migrate() {
-	db := s.InitDb()
+	db := s.Db
 
 	sqlDB, err := db.DB()
 	if err != nil {
