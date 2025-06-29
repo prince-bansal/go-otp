@@ -50,7 +50,7 @@ func (h *OrganisationHandler) createOrganisation(ctx *gin.Context) {
 		ctx.JSON(400, Response.SendError("getting error creating organisation", err))
 		return
 	}
-	ctx.JSON(201, record)
+	ctx.JSON(201, Response.Success(record))
 }
 
 func (h *OrganisationHandler) getAll(ctx *gin.Context) {
@@ -59,7 +59,7 @@ func (h *OrganisationHandler) getAll(ctx *gin.Context) {
 		ctx.JSON(400, Response.SendError("getting error creating organisation", err))
 		return
 	}
-	ctx.JSON(200, records)
+	ctx.JSON(200, Response.Success(records))
 }
 
 func (h *OrganisationHandler) getOne(ctx *gin.Context) {
@@ -70,5 +70,5 @@ func (h *OrganisationHandler) getOne(ctx *gin.Context) {
 		ctx.JSON(400, Response.SendError("cannot find organisation with id", err))
 		return
 	}
-	ctx.JSON(200, record)
+	ctx.JSON(200, Response.Success(record))
 }

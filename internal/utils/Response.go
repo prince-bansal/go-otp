@@ -16,7 +16,12 @@ type ErrorResponse struct {
 	ErrorDetail interface{} `json:"errorDetail"`
 }
 
-func (e *ErrorResponse) SendInvalidError(message string, details interface{}) *ErrorResponse {
+type SuccessResponse struct {
+	Status int         `json:"status"`
+	Data   interface{} `json:"data"`
+}
+
+func SendInvalidError(message string, details interface{}) *ErrorResponse {
 	return &ErrorResponse{
 		Status:      400,
 		Error:       message,
@@ -37,6 +42,20 @@ func SendError(message string, details interface{}) *ErrorResponse {
 		Status:      400,
 		Error:       message,
 		ErrorDetail: details,
+	}
+}
+
+func Success(details interface{}) *SuccessResponse {
+	return &SuccessResponse{
+		Status: 200,
+		Data:   details,
+	}
+}
+
+func SuccessWithStatus(status int, details interface{}) *SuccessResponse {
+	return &SuccessResponse{
+		Status: 200,
+		Data:   details,
 	}
 }
 

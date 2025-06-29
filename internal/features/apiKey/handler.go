@@ -33,7 +33,7 @@ func (h *ApiKeyHandler) createApiKey(ctx *gin.Context) {
 	err := ctx.ShouldBindJSON(&req)
 	if err != nil {
 		fmt.Println("getting error unmarshalling api request", err)
-		ctx.JSON(400, err)
+		ctx.JSON(400, Response.SendInvalidError("unable to marshal request", err))
 		return
 	}
 
@@ -61,7 +61,7 @@ func (h *ApiKeyHandler) createApiKey(ctx *gin.Context) {
 		ctx.JSON(400, err)
 		return
 	}
-	ctx.JSON(201, createdKey)
+	ctx.JSON(201, Response.SuccessWithStatus(201, createdKey))
 	return
 }
 
@@ -77,7 +77,7 @@ func (h *ApiKeyHandler) getAllApiKeyByOrganisation(ctx *gin.Context) {
 		ctx.JSON(400, err)
 		return
 	}
-	ctx.JSON(200, apiKeys)
+	ctx.JSON(200, Response.Success(apiKeys))
 	return
 }
 
@@ -92,10 +92,10 @@ func (h *ApiKeyHandler) expireKey(ctx *gin.Context) {
 
 	deletedRecord, err := h.apiService.Expire(ctx, intId)
 	if err != nil {
-		ctx.JSON(400, err)
+		ctx.JSON(400, Response.SendError("invalid request", err))
 		return
 	}
-	ctx.JSON(200, deletedRecord)
+	ctx.JSON(200, Response.Success(deletedRecord))
 	return
 
 }
