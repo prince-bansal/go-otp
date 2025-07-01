@@ -2,19 +2,36 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/prince-bansal/go-otp/internal/features/apiKey"
 	Response "github.com/prince-bansal/go-otp/internal/utils"
 )
 
-func ApiGuard() gin.HandlerFunc {
-	return func(c *gin.Context) {
+type Middleware struct {
+	apiService apiKey.ApiService
+}
 
-		apiKey := c.GetHeader("API_KEY")
-		if apiKey == "" {
+func NewMiddleware(apiService apiKey.ApiService) *Middleware {
+	return &Middleware{
+		apiService: apiService,
+	}
+}
+
+func (m *Middleware) ApiGuard() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		key := c.GetHeader("API_KEY")
+		if key == "" {
 			c.JSON(401, Response.SendAuthenticationError())
 			c.Abort()
 			return
 		}
-		c.Set("API_KEY", apiKey)
+		org, err := m.apiService.GetByApiKey(c, key)
+		if err != nil {
+			c.JSON(401, Response.SendAuthenticationError())
+			c.Abort()
+			return
+
+		}
+		c.Set("OrganisationId", org.OrganisationId)
 		c.Next()
 	}
 }

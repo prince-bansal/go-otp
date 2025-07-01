@@ -9,13 +9,14 @@ import (
 
 type OtpHandler struct {
 	service OtpService
+	m       *middleware.Middleware
 }
 
 func (h *OtpHandler) InitRoutes(router *gin.Engine) {
 	routes := router.Group("/otp")
 	routes.DELETE("/", h.deleteExpiredOtp)
 	{
-		protectedRoutes := routes.Group("").Use(middleware.ApiGuard())
+		protectedRoutes := routes.Group("").Use(h.m.ApiGuard())
 		{
 			protectedRoutes.POST("/", h.generateOtp)
 			protectedRoutes.POST("/verify", h.verifyOtp)
@@ -23,10 +24,12 @@ func (h *OtpHandler) InitRoutes(router *gin.Engine) {
 	}
 }
 
-func NewOtpHandler(service OtpService) *OtpHandler {
+func NewOtpHandler(service OtpService, m *middleware.Middleware) *OtpHandler {
 	return &OtpHandler{
 		service: service,
+		m:       m,
 	}
+
 }
 
 func (h *OtpHandler) generateOtp(ctx *gin.Context) {
@@ -39,9 +42,7 @@ func (h *OtpHandler) generateOtp(ctx *gin.Context) {
 		return
 	}
 
-	apiKey, _ := ctx.Get("API_KEY")
-
-	otp, err := h.service.GenerateOtp(ctx, &req, apiKey.(string))
+	otp, err := h.service.GenerateOtp(ctx, &req)
 
 	if err != nil {
 		ctx.JSON(400, Response.SendInvalidError("cannot generate otp right now", err))
@@ -60,9 +61,7 @@ func (h *OtpHandler) verifyOtp(ctx *gin.Context) {
 		return
 	}
 
-	apiKey, _ := ctx.Get("API_KEY")
-
-	success, err := h.service.VerifyOtp(ctx, &req, apiKey.(string))
+	success, err := h.service.VerifyOtp(ctx, &req)
 	if err != nil || !success {
 		ctx.JSON(400, Response.SendInvalidError("could not verify", err))
 		return

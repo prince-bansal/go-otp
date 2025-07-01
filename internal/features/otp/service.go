@@ -7,8 +7,8 @@ import (
 )
 
 type OtpService interface {
-	GenerateOtp(ctx context.Context, otp *domain.OtpGenerateRequest, api string) (*domain.OtpGenerateResponse, error)
-	VerifyOtp(ctx context.Context, request *domain.OtpVerifyRequest, api string) (bool, error)
+	GenerateOtp(ctx context.Context, otp *domain.OtpGenerateRequest) (*domain.OtpGenerateResponse, error)
+	VerifyOtp(ctx context.Context, request *domain.OtpVerifyRequest) (bool, error)
 	CleanOtps(ctx context.Context) (bool, error)
 }
 
@@ -24,13 +24,11 @@ func NewOtpService(repository OtpRepository, api apiKey.ApiService) OtpService {
 	}
 }
 
-func (s *impl) GenerateOtp(ctx context.Context, req *domain.OtpGenerateRequest, apiKey string) (*domain.OtpGenerateResponse, error) {
-	org, err := s.apiService.GetByApiKey(ctx, apiKey)
-	if err != nil {
-		return nil, err
-	}
+func (s *impl) GenerateOtp(ctx context.Context, req *domain.OtpGenerateRequest) (*domain.OtpGenerateResponse, error) {
+	orgId := ctx.Value("OrganisationId")
+
 	d := domain.Otp{
-		OrganisationId: org.OrganisationId,
+		OrganisationId: orgId.(int),
 		MobileNo:       req.MobileNo,
 	}
 	d.Otp = d.GenerateOtp()
@@ -46,14 +44,11 @@ func (s *impl) GenerateOtp(ctx context.Context, req *domain.OtpGenerateRequest, 
 	}, err
 }
 
-func (s *impl) VerifyOtp(ctx context.Context, req *domain.OtpVerifyRequest, api string) (bool, error) {
-	org, err := s.apiService.GetByApiKey(ctx, api)
-	if err != nil {
-		return false, err
-	}
+func (s *impl) VerifyOtp(ctx context.Context, req *domain.OtpVerifyRequest) (bool, error) {
+	orgId := ctx.Value("OrganisationId")
 	d := domain.Otp{
 		Otp:            req.Otp,
-		OrganisationId: org.Id,
+		OrganisationId: orgId.(int),
 		MobileNo:       req.MobileNo,
 	}
 
