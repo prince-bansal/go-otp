@@ -52,9 +52,17 @@ func Success(details interface{}) *SuccessResponse {
 	}
 }
 
+func SendAuthenticationError() *ErrorResponse {
+	return &ErrorResponse{
+		Status:      401,
+		Error:       "Unauthenticated",
+		ErrorDetail: "api key is required",
+	}
+}
+
 func SuccessWithStatus(status int, details interface{}) *SuccessResponse {
 	return &SuccessResponse{
-		Status: 200,
+		Status: status,
 		Data:   details,
 	}
 }

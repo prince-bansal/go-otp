@@ -11,6 +11,7 @@ import (
 type OrganisationRepository interface {
 	GetAll(ctx context.Context) ([]*domain.OrganisationD, error)
 	GetOne(ctx context.Context, id string) (*domain.OrganisationD, error)
+	GetByApiKey(ctx context.Context, key string) (*domain.OrganisationD, error)
 	Register(ctx context.Context, request *domain.OrganisationD) (*domain.OrganisationD, error)
 }
 
@@ -45,6 +46,16 @@ func (r *OrganisationRepositoryImpl) GetOne(ctx context.Context, id string) (*do
 	if err := r.db.
 		WithContext(ctx).
 		First(&model, id).Error; err != nil {
+		return nil, err
+	}
+	return model.ToDomain(), nil
+}
+
+func (r *OrganisationRepositoryImpl) GetByApiKey(ctx context.Context, apiKey string) (*domain.OrganisationD, error) {
+	var model models.Organisation
+	if err := r.db.
+		WithContext(ctx).
+		First(&model, "api_key = ?", apiKey).Error; err != nil {
 		return nil, err
 	}
 	return model.ToDomain(), nil

@@ -1,0 +1,65 @@
+package otp
+
+import (
+	"context"
+	"github.com/prince-bansal/go-otp/internal/features/apiKey"
+	"github.com/prince-bansal/go-otp/internal/features/otp/domain"
+)
+
+type OtpService interface {
+	GenerateOtp(ctx context.Context, otp *domain.OtpGenerateRequest, api string) (*domain.OtpGenerateResponse, error)
+	VerifyOtp(ctx context.Context, request *domain.OtpVerifyRequest, api string) (bool, error)
+	CleanOtps(ctx context.Context) (bool, error)
+}
+
+type impl struct {
+	repository OtpRepository
+	apiService apiKey.ApiService
+}
+
+func NewOtpService(repository OtpRepository, api apiKey.ApiService) OtpService {
+	return &impl{
+		repository: repository,
+		apiService: api,
+	}
+}
+
+func (s *impl) GenerateOtp(ctx context.Context, req *domain.OtpGenerateRequest, apiKey string) (*domain.OtpGenerateResponse, error) {
+	org, err := s.apiService.GetByApiKey(ctx, apiKey)
+	if err != nil {
+		return nil, err
+	}
+	d := domain.Otp{
+		OrganisationId: org.OrganisationId,
+		MobileNo:       req.MobileNo,
+	}
+	d.Otp = d.GenerateOtp()
+
+	record, err := s.repository.Insert(ctx, &d)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &domain.OtpGenerateResponse{
+		Otp: record.Otp,
+	}, err
+}
+
+func (s *impl) VerifyOtp(ctx context.Context, req *domain.OtpVerifyRequest, api string) (bool, error) {
+	org, err := s.apiService.GetByApiKey(ctx, api)
+	if err != nil {
+		return false, err
+	}
+	d := domain.Otp{
+		Otp:            req.Otp,
+		OrganisationId: org.Id,
+		MobileNo:       req.MobileNo,
+	}
+
+	return s.repository.Verify(ctx, &d)
+}
+
+func (s *impl) CleanOtps(ctx context.Context) (bool, error) {
+	return s.repository.DeleteExpired(ctx)
+}

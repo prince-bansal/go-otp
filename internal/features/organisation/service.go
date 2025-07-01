@@ -9,6 +9,7 @@ type OrganisationService interface {
 	GetAll(ctx context.Context) ([]*domain.OrganisationD, error)
 	GetOne(ctx context.Context, id string) (*domain.OrganisationD, error)
 	Register(ctx context.Context, request *domain.OrganisationD) (*domain.OrganisationD, error)
+	GetByApiKey(ctx context.Context, api string) (*domain.OrganisationD, error)
 }
 
 func NewOrganisationService(organisationRepository OrganisationRepository) OrganisationService {
@@ -43,4 +44,12 @@ func (s *OrganisationServiceImpl) Register(ctx context.Context, request *domain.
 		return nil, err
 	}
 	return createdRecord, nil
+}
+
+func (s *OrganisationServiceImpl) GetByApiKey(ctx context.Context, api string) (*domain.OrganisationD, error) {
+	record, err := s.organisationRepository.GetByApiKey(ctx, api)
+	if err != nil {
+		return nil, err
+	}
+	return record, nil
 }

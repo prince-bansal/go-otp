@@ -9,6 +9,7 @@ type ApiService interface {
 	GetAll(ctx context.Context, id int) ([]*domain.ApiKeyD, error)
 	Create(ctx context.Context, request *domain.ApiKeyD) (*domain.ApiKeyD, error)
 	Expire(ctx context.Context, id int) (*domain.ApiKeyD, error)
+	GetByApiKey(ctx context.Context, api string) (*domain.ApiKeyD, error)
 }
 
 func NewApiService(repository ApiKeyRepository) ApiService {
@@ -44,4 +45,8 @@ func (s *ApiServiceImpl) Expire(ctx context.Context, id int) (*domain.ApiKeyD, e
 	}
 	deletedRecord, err := s.repository.SoftDelete(ctx, record)
 	return deletedRecord, err
+}
+
+func (s *ApiServiceImpl) GetByApiKey(ctx context.Context, api string) (*domain.ApiKeyD, error) {
+	return s.repository.GetByApiKey(ctx, api)
 }
