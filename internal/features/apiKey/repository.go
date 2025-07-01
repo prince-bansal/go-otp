@@ -13,7 +13,7 @@ type ApiKeyRepository interface {
 	Get(ctx context.Context, orgId int) ([]*domain.ApiKeyD, error)
 	SoftDelete(ctx context.Context, d *domain.ApiKeyD) (*domain.ApiKeyD, error)
 	FindById(ctx context.Context, id int) (*domain.ApiKeyD, error)
-	GetByApiKey(ctx context.Context, key string) (*domain.ApiKeyD, error)
+	GetBySaltHash(ctx context.Context, salt string) (*domain.ApiKeyD, error)
 }
 
 type Impl struct {
@@ -70,12 +70,12 @@ func (r *Impl) FindById(ctx context.Context, id int) (*domain.ApiKeyD, error) {
 	}
 	return model.ToDomain(), nil
 }
-func (r *Impl) GetByApiKey(ctx context.Context, key string) (*domain.ApiKeyD, error) {
+func (r *Impl) GetBySaltHash(ctx context.Context, salt string) (*domain.ApiKeyD, error) {
 	var model models.ApiKey
 	if err := r.db.
 		WithContext(ctx).
 		Preload("Organisation").
-		First(&model, "api_key = ?", key).
+		First(&model, "salt_hash = ?", salt).
 		Error; err != nil {
 		return nil, err
 	}

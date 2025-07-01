@@ -32,9 +32,7 @@ func (s *impl) GenerateOtp(ctx context.Context, req *domain.OtpGenerateRequest) 
 		MobileNo:       req.MobileNo,
 	}
 	d.Otp = d.GenerateOtp()
-
 	record, err := s.repository.Insert(ctx, &d)
-
 	if err != nil {
 		return nil, err
 	}

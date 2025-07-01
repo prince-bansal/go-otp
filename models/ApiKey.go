@@ -10,6 +10,7 @@ import (
 type ApiKey struct {
 	Id             int            `json:"id" gorm:"column:id"`
 	Key            string         `json:"key" gorm:"column:api_key"`
+	Salt           string         `json:"salt" gorm:"column:salt_hash"`
 	OrganisationId int            `json:"organisation_id" gorm:"column:organisation_id"`
 	Organisation   Organisation   `json:"organisation" gorm:"foreignKey:OrganisationId"`
 	Expiry         time.Time      `json:"expiry" gorm:"column:expiry"`
@@ -21,7 +22,8 @@ type ApiKey struct {
 func (m *ApiKey) FromDomain(d *domain.ApiKeyD) {
 	m.OrganisationId = d.OrganisationId
 	m.Expiry = d.Expiry
-	m.Key = d.GenerateKey()
+	m.Key = d.Key
+	m.Salt = d.Salt
 }
 
 func (m *ApiKey) ToDomain() *domain.ApiKeyD {
@@ -33,6 +35,7 @@ func (m *ApiKey) ToDomain() *domain.ApiKeyD {
 		Expiry:         m.Expiry,
 		CreatedAt:      m.CreatedAt,
 		UpdatedAt:      m.UpdatedAt,
+		Salt:           m.Salt,
 	}
 
 	if m.Organisation.Id != 0 {

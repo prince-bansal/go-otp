@@ -26,7 +26,7 @@ func (m *Middleware) ApiGuard() gin.HandlerFunc {
 		}
 		org, err := m.apiService.GetByApiKey(c, key)
 		if err != nil {
-			c.JSON(401, Response.SendAuthenticationError())
+			c.JSON(401, Response.SendInvalidError("invalid request", err))
 			c.Abort()
 			return
 

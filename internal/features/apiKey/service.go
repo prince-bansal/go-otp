@@ -7,7 +7,7 @@ import (
 
 type ApiService interface {
 	GetAll(ctx context.Context, id int) ([]*domain.ApiKeyD, error)
-	Create(ctx context.Context, request *domain.ApiKeyD) (*domain.ApiKeyD, error)
+	Create(ctx context.Context, request *domain.ApiKeyD) (*domain.ApiGenerateResponse, error)
 	Expire(ctx context.Context, id int) (*domain.ApiKeyD, error)
 	GetByApiKey(ctx context.Context, api string) (*domain.ApiKeyD, error)
 }
@@ -30,12 +30,23 @@ func (s *ApiServiceImpl) GetAll(ctx context.Context, id int) ([]*domain.ApiKeyD,
 	return records, nil
 }
 
-func (s *ApiServiceImpl) Create(ctx context.Context, request *domain.ApiKeyD) (*domain.ApiKeyD, error) {
-	createdRecord, err := s.repository.Create(ctx, request)
+func (s *ApiServiceImpl) Create(ctx context.Context, request *domain.ApiKeyD) (*domain.ApiGenerateResponse, error) {
+
+	request.GenerateKey()
+	response := &domain.ApiGenerateResponse{
+		Otp: request.Key,
+	}
+
+	err := request.HashKey()
 	if err != nil {
 		return nil, err
 	}
-	return createdRecord, nil
+
+	_, err = s.repository.Create(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
 }
 
 func (s *ApiServiceImpl) Expire(ctx context.Context, id int) (*domain.ApiKeyD, error) {
@@ -47,6 +58,24 @@ func (s *ApiServiceImpl) Expire(ctx context.Context, id int) (*domain.ApiKeyD, e
 	return deletedRecord, err
 }
 
-func (s *ApiServiceImpl) GetByApiKey(ctx context.Context, api string) (*domain.ApiKeyD, error) {
-	return s.repository.GetByApiKey(ctx, api)
+func (s *ApiServiceImpl) GetByApiKey(ctx context.Context, apiKey string) (*domain.ApiKeyD, error) {
+
+	d := &domain.ApiKeyD{Key: apiKey}
+	err := d.HashKey()
+	if err != nil {
+		return nil, err
+	}
+
+	record, err := s.repository.GetBySaltHash(ctx, d.Salt)
+	if err != nil {
+		return nil, err
+	}
+
+	success, err := d.CompareKey(apiKey)
+
+	if err != nil || !success {
+		return nil, err
+	}
+
+	return record, nil
 }
