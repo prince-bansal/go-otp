@@ -3,6 +3,7 @@ package otp
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/prince-bansal/go-otp/internal/features/otp/domain"
+	"github.com/prince-bansal/go-otp/internal/middleware"
 	Response "github.com/prince-bansal/go-otp/internal/utils"
 )
 
@@ -12,10 +13,13 @@ type OtpHandler struct {
 
 func (h *OtpHandler) InitRoutes(router *gin.Engine) {
 	routes := router.Group("/otp")
+	routes.DELETE("/", h.deleteExpiredOtp)
 	{
-		routes.POST("/", h.generateOtp)
-		routes.POST("/verify", h.verifyOtp)
-		routes.DELETE("/", h.deleteExpiredOtp)
+		protectedRoutes := routes.Group("").Use(middleware.ApiGuard())
+		{
+			protectedRoutes.POST("/", h.generateOtp)
+			protectedRoutes.POST("/verify", h.verifyOtp)
+		}
 	}
 }
 
@@ -35,14 +39,9 @@ func (h *OtpHandler) generateOtp(ctx *gin.Context) {
 		return
 	}
 
-	apiKey := ctx.GetHeader("API_KEY")
+	apiKey, _ := ctx.Get("API_KEY")
 
-	if apiKey == "" {
-		ctx.JSON(400, Response.SendAuthenticationError())
-		return
-	}
-
-	otp, err := h.service.GenerateOtp(ctx, &req, apiKey)
+	otp, err := h.service.GenerateOtp(ctx, &req, apiKey.(string))
 
 	if err != nil {
 		ctx.JSON(400, Response.SendInvalidError("cannot generate otp right now", err))
@@ -61,13 +60,9 @@ func (h *OtpHandler) verifyOtp(ctx *gin.Context) {
 		return
 	}
 
-	apiKey := ctx.GetHeader("API_KEY")
-	if apiKey == "" {
-		ctx.JSON(400, Response.SendAuthenticationError())
-		return
-	}
+	apiKey, _ := ctx.Get("API_KEY")
 
-	success, err := h.service.VerifyOtp(ctx, &req, apiKey)
+	success, err := h.service.VerifyOtp(ctx, &req, apiKey.(string))
 	if err != nil || !success {
 		ctx.JSON(400, Response.SendInvalidError("could not verify", err))
 		return
