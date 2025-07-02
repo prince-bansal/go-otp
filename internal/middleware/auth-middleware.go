@@ -3,15 +3,15 @@ package middleware
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/prince-bansal/go-otp/internal/domain/response"
-	"github.com/prince-bansal/go-otp/internal/features/apiKey"
+	"github.com/prince-bansal/go-otp/internal/features/api_key"
 	"github.com/prince-bansal/go-otp/internal/utils/constants"
 )
 
 type Middleware struct {
-	apiService apiKey.ApiService
+	apiService api_key.ApiService
 }
 
-func NewMiddleware(apiService apiKey.ApiService) *Middleware {
+func NewMiddleware(apiService api_key.ApiService) *Middleware {
 	return &Middleware{
 		apiService: apiService,
 	}

@@ -3,7 +3,7 @@ package otp
 import (
 	"context"
 	"github.com/prince-bansal/go-otp/internal/domain"
-	"github.com/prince-bansal/go-otp/internal/features/apiKey"
+	"github.com/prince-bansal/go-otp/internal/features/api_key"
 )
 
 type OtpService interface {
@@ -14,10 +14,10 @@ type OtpService interface {
 
 type impl struct {
 	repository OtpRepository
-	apiService apiKey.ApiService
+	apiService api_key.ApiService
 }
 
-func NewOtpService(repository OtpRepository, api apiKey.ApiService) OtpService {
+func NewOtpService(repository OtpRepository, api api_key.ApiService) OtpService {
 	return &impl{
 		repository: repository,
 		apiService: api,
