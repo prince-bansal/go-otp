@@ -3,8 +3,8 @@ package apiKey
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/prince-bansal/go-otp/internal/features/apiKey/domain"
-	Response "github.com/prince-bansal/go-otp/internal/utils"
+	"github.com/prince-bansal/go-otp/internal/domain"
+	"github.com/prince-bansal/go-otp/internal/domain/response"
 	"github.com/prince-bansal/go-otp/internal/utils/timeutil"
 	"strconv"
 )
@@ -33,21 +33,21 @@ func (h *ApiKeyHandler) createApiKey(ctx *gin.Context) {
 	err := ctx.ShouldBindJSON(&req)
 	if err != nil {
 		fmt.Println("getting error unmarshalling api request", err)
-		ctx.JSON(400, Response.SendInvalidError("unable to marshal request", err))
+		ctx.JSON(400, response.SendInvalidError("unable to marshal request", err))
 		return
 	}
 
 	err = req.Validate()
 	if err != nil {
 		fmt.Println("validation error", err)
-		ctx.JSON(400, Response.SendValidationError(err))
+		ctx.JSON(400, response.SendValidationError(err))
 		return
 	}
 
 	parsedTime, err := timeutil.ConvertInYYYYMMDD(req.Expiry)
 	if err != nil {
 		fmt.Println("time conversation error", err)
-		ctx.JSON(400, Response.SendError("time conversion error", err))
+		ctx.JSON(400, response.SendError("time conversion error", err))
 		return
 	}
 
@@ -61,7 +61,7 @@ func (h *ApiKeyHandler) createApiKey(ctx *gin.Context) {
 		ctx.JSON(400, err)
 		return
 	}
-	ctx.JSON(201, Response.SuccessWithStatus(201, createdKey))
+	ctx.JSON(201, response.SuccessWithStatus(201, createdKey))
 	return
 }
 
@@ -77,7 +77,7 @@ func (h *ApiKeyHandler) getAllApiKeyByOrganisation(ctx *gin.Context) {
 		ctx.JSON(400, err)
 		return
 	}
-	ctx.JSON(200, Response.Success(apiKeys))
+	ctx.JSON(200, response.Success(apiKeys))
 	return
 }
 
@@ -92,10 +92,10 @@ func (h *ApiKeyHandler) expireKey(ctx *gin.Context) {
 
 	deletedRecord, err := h.apiService.Expire(ctx, intId)
 	if err != nil {
-		ctx.JSON(400, Response.SendError("invalid request", err))
+		ctx.JSON(400, response.SendError("invalid request", err))
 		return
 	}
-	ctx.JSON(200, Response.Success(deletedRecord))
+	ctx.JSON(200, response.Success(deletedRecord))
 	return
 
 }

@@ -5,7 +5,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"github.com/prince-bansal/go-otp/internal/features/organisation/domain"
 	"golang.org/x/crypto/bcrypt"
 	"time"
 )
@@ -16,14 +15,14 @@ const (
 )
 
 type ApiKeyD struct {
-	Id             int                  `json:"id"`
-	Key            string               `json:"key"`
-	Salt           string               `json:"salt"`
-	OrganisationId int                  `json:"organisationId"`
-	Organisation   domain.OrganisationD `json:"organisation"`
-	Expiry         time.Time            `json:"expiry"`
-	CreatedAt      time.Time            `json:"createdAt"`
-	UpdatedAt      time.Time            `json:"updatedAt"`
+	Id             int           `json:"id"`
+	Key            string        `json:"key"`
+	Salt           string        `json:"salt"`
+	OrganisationId int           `json:"organisationId"`
+	Organisation   OrganisationD `json:"organisation"`
+	Expiry         time.Time     `json:"expiry"`
+	CreatedAt      time.Time     `json:"createdAt"`
+	UpdatedAt      time.Time     `json:"updatedAt"`
 }
 
 func (d *ApiKeyD) GenerateKey() string {

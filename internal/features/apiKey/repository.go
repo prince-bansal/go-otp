@@ -2,7 +2,7 @@ package apiKey
 
 import (
 	"context"
-	"github.com/prince-bansal/go-otp/internal/features/apiKey/domain"
+	"github.com/prince-bansal/go-otp/internal/domain"
 	"github.com/prince-bansal/go-otp/models"
 	"github.com/prince-bansal/go-otp/store/db"
 	"gorm.io/gorm"

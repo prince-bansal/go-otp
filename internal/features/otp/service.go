@@ -2,8 +2,8 @@ package otp
 
 import (
 	"context"
+	"github.com/prince-bansal/go-otp/internal/domain"
 	"github.com/prince-bansal/go-otp/internal/features/apiKey"
-	"github.com/prince-bansal/go-otp/internal/features/otp/domain"
 )
 
 type OtpService interface {

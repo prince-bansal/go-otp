@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/prince-bansal/go-otp/internal/features/otp/domain"
+	"github.com/prince-bansal/go-otp/internal/domain"
 	"gorm.io/gorm"
 	"time"
 )

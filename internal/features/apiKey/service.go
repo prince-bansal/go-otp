@@ -2,7 +2,7 @@ package apiKey
 
 import (
 	"context"
-	"github.com/prince-bansal/go-otp/internal/features/apiKey/domain"
+	domain "github.com/prince-bansal/go-otp/internal/domain"
 )
 
 type ApiService interface {

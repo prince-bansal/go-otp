@@ -2,8 +2,9 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/prince-bansal/go-otp/internal/domain/response"
 	"github.com/prince-bansal/go-otp/internal/features/apiKey"
-	Response "github.com/prince-bansal/go-otp/internal/utils"
+	"github.com/prince-bansal/go-otp/internal/utils/constants"
 )
 
 type Middleware struct {
@@ -18,15 +19,15 @@ func NewMiddleware(apiService apiKey.ApiService) *Middleware {
 
 func (m *Middleware) ApiGuard() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		key := c.GetHeader("API_KEY")
+		key := c.GetHeader(constants.API_KEY)
 		if key == "" {
-			c.JSON(401, Response.SendAuthenticationError())
+			c.JSON(401, response.SendAuthenticationError())
 			c.Abort()
 			return
 		}
 		org, err := m.apiService.GetByApiKey(c, key)
 		if err != nil {
-			c.JSON(401, Response.SendInvalidError("invalid request", err))
+			c.JSON(401, response.SendInvalidError("invalid request", err))
 			c.Abort()
 			return
 

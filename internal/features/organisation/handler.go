@@ -2,8 +2,8 @@ package organisation
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/prince-bansal/go-otp/internal/features/organisation/domain"
-	"github.com/prince-bansal/go-otp/internal/utils"
+	domain "github.com/prince-bansal/go-otp/internal/domain"
+	"github.com/prince-bansal/go-otp/internal/domain/response"
 )
 
 type OrganisationHandler struct {
@@ -30,13 +30,13 @@ func (h *OrganisationHandler) createOrganisation(ctx *gin.Context) {
 
 	err := ctx.ShouldBindJSON(&req)
 	if err != nil {
-		ctx.JSON(400, Response.SendValidationError(err))
+		ctx.JSON(400, response.SendValidationError(err))
 		return
 	}
 
 	err = req.Validate()
 	if err != nil {
-		ctx.JSON(400, Response.SendValidationError(err))
+		ctx.JSON(400, response.SendValidationError(err))
 		return
 	}
 
@@ -47,19 +47,19 @@ func (h *OrganisationHandler) createOrganisation(ctx *gin.Context) {
 
 	record, err := h.organisationService.Register(ctx, data)
 	if err != nil {
-		ctx.JSON(400, Response.SendError("getting error creating organisation", err))
+		ctx.JSON(400, response.SendError("getting error creating organisation", err))
 		return
 	}
-	ctx.JSON(201, Response.Success(record))
+	ctx.JSON(201, response.Success(record))
 }
 
 func (h *OrganisationHandler) getAll(ctx *gin.Context) {
 	records, err := h.organisationService.GetAll(ctx)
 	if err != nil {
-		ctx.JSON(400, Response.SendError("getting error creating organisation", err))
+		ctx.JSON(400, response.SendError("getting error creating organisation", err))
 		return
 	}
-	ctx.JSON(200, Response.Success(records))
+	ctx.JSON(200, response.Success(records))
 }
 
 func (h *OrganisationHandler) getOne(ctx *gin.Context) {
@@ -67,8 +67,8 @@ func (h *OrganisationHandler) getOne(ctx *gin.Context) {
 	id := ctx.Param("id")
 	record, err := h.organisationService.GetOne(ctx, id)
 	if err != nil {
-		ctx.JSON(400, Response.SendError("cannot find organisation with id", err))
+		ctx.JSON(400, response.SendError("cannot find organisation with id", err))
 		return
 	}
-	ctx.JSON(200, Response.Success(record))
+	ctx.JSON(200, response.Success(record))
 }

@@ -8,3 +8,7 @@ type OtpVerifyRequest struct {
 type OtpGenerateRequest struct {
 	MobileNo int `json:"mobileNo"`
 }
+
+type OtpGenerateResponse struct {
+	Otp string `json:"otp"`
+}

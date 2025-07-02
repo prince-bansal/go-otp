@@ -3,7 +3,7 @@ package otp
 import (
 	"context"
 	"errors"
-	"github.com/prince-bansal/go-otp/internal/features/otp/domain"
+	"github.com/prince-bansal/go-otp/internal/domain"
 	"github.com/prince-bansal/go-otp/models"
 	"github.com/prince-bansal/go-otp/store/db"
 	"gorm.io/gorm"

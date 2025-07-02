@@ -12,3 +12,7 @@ func (r *ApiKeyRequest) Validate() error {
 	err := validate.Struct(r)
 	return err
 }
+
+type ApiGenerateResponse struct {
+	Otp string `json:"otp"`
+}

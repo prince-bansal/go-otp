@@ -1,8 +1,7 @@
 package models
 
 import (
-	"github.com/prince-bansal/go-otp/internal/features/apiKey/domain"
-	domain2 "github.com/prince-bansal/go-otp/internal/features/organisation/domain"
+	"github.com/prince-bansal/go-otp/internal/domain"
 	"gorm.io/gorm"
 	"time"
 )
@@ -39,7 +38,7 @@ func (m *ApiKey) ToDomain() *domain.ApiKeyD {
 	}
 
 	if m.Organisation.Id != 0 {
-		d.Organisation = domain2.OrganisationD{
+		d.Organisation = domain.OrganisationD{
 			Id:        m.Organisation.Id,
 			Name:      m.Organisation.Name,
 			Email:     m.Organisation.Email,

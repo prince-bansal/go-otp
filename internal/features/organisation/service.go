@@ -2,7 +2,7 @@ package organisation
 
 import (
 	"context"
-	"github.com/prince-bansal/go-otp/internal/features/organisation/domain"
+	"github.com/prince-bansal/go-otp/internal/domain"
 )
 
 type OrganisationService interface {
