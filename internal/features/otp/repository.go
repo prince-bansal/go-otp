@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/prince-bansal/go-otp/internal/domain"
 	"github.com/prince-bansal/go-otp/models"
+	"github.com/prince-bansal/go-otp/pkg/logger"
 	"github.com/prince-bansal/go-otp/store/db"
 	"gorm.io/gorm"
 	"time"
@@ -30,6 +31,7 @@ func (r *Impl) Insert(ctx context.Context, domain *domain.Otp) (*domain.Otp, err
 	var model models.Otp
 	model.FromDomain(domain)
 	if err := r.db.WithContext(ctx).Create(&model).Error; err != nil {
+		logger.Error("failed to save otp", err)
 		return nil, err
 	}
 	return model.ToDomain(), nil
@@ -42,6 +44,7 @@ func (r *Impl) DeleteExpired(ctx context.Context) (bool, error) {
 	if err := r.db.
 		WithContext(ctx).
 		Delete(&model, "created_at < ?", endTime).Error; err != nil {
+		logger.Error("failed to delete expired otps", err)
 		return false, err
 	}
 
@@ -59,6 +62,7 @@ func (r *Impl) Verify(ctx context.Context, domain *domain.Otp) (bool, error) {
 		Delete(&model, "mobile_number = ? AND otp = ? AND created_at > ?", domain.MobileNo, domain.Otp, nMinutesAgo)
 
 	if deletedRows.Error != nil {
+		logger.Error("otp not found for number %d", domain.MobileNo)
 		return false, deletedRows.Error
 	}
 

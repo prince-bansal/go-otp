@@ -3,6 +3,7 @@ package api_key
 import (
 	"context"
 	domain "github.com/prince-bansal/go-otp/internal/domain"
+	"github.com/prince-bansal/go-otp/pkg/logger"
 )
 
 type ApiService interface {
@@ -25,6 +26,7 @@ type ApiServiceImpl struct {
 func (s *ApiServiceImpl) GetAll(ctx context.Context, id int) ([]*domain.ApiKeyD, error) {
 	records, err := s.repository.Get(ctx, id)
 	if err != nil {
+		logger.Error("failed to get the api key(s)", err)
 		return nil, err
 	}
 	return records, nil
@@ -39,11 +41,13 @@ func (s *ApiServiceImpl) Create(ctx context.Context, request *domain.ApiKeyD) (*
 
 	err := request.HashKey()
 	if err != nil {
+		logger.Error("failed to hash key: %s", request.Key)
 		return nil, err
 	}
 
 	_, err = s.repository.Create(ctx, request)
 	if err != nil {
+		logger.Error("failed to save user", err)
 		return nil, err
 	}
 	return response, nil
@@ -52,6 +56,7 @@ func (s *ApiServiceImpl) Create(ctx context.Context, request *domain.ApiKeyD) (*
 func (s *ApiServiceImpl) Expire(ctx context.Context, id int) (*domain.ApiKeyD, error) {
 	record, err := s.repository.FindById(ctx, id)
 	if err != nil {
+		logger.Error("api key not found: %d", id)
 		return nil, err
 	}
 	deletedRecord, err := s.repository.SoftDelete(ctx, record)
@@ -63,17 +68,20 @@ func (s *ApiServiceImpl) GetByApiKey(ctx context.Context, apiKey string) (*domai
 	d := &domain.ApiKeyD{Key: apiKey}
 	err := d.HashKey()
 	if err != nil {
+		logger.Error("failed to hash the key: %s", d.Key)
 		return nil, err
 	}
 
 	record, err := s.repository.GetBySaltHash(ctx, d.Salt)
 	if err != nil {
+		logger.Error("failed to generate salt for key: %s", apiKey)
 		return nil, err
 	}
 
 	success, err := d.CompareKey(apiKey)
 
 	if err != nil || !success {
+		logger.Error("key mismatch", err)
 		return nil, err
 	}
 

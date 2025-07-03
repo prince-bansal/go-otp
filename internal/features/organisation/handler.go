@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	domain "github.com/prince-bansal/go-otp/internal/domain"
 	"github.com/prince-bansal/go-otp/internal/domain/response"
+	"github.com/prince-bansal/go-otp/pkg/logger"
 )
 
 type OrganisationHandler struct {
@@ -30,12 +31,14 @@ func (h *OrganisationHandler) createOrganisation(ctx *gin.Context) {
 
 	err := ctx.ShouldBindJSON(&req)
 	if err != nil {
+		logger.Error("failed to parse request body", err)
 		ctx.JSON(400, response.SendValidationError(err))
 		return
 	}
 
 	err = req.Validate()
 	if err != nil {
+		logger.Error("invalid body", err)
 		ctx.JSON(400, response.SendValidationError(err))
 		return
 	}
@@ -47,6 +50,7 @@ func (h *OrganisationHandler) createOrganisation(ctx *gin.Context) {
 
 	record, err := h.organisationService.Register(ctx, data)
 	if err != nil {
+		logger.Error("failed to save organisation", err)
 		ctx.JSON(400, response.SendError("getting error creating organisation", err))
 		return
 	}
@@ -56,6 +60,7 @@ func (h *OrganisationHandler) createOrganisation(ctx *gin.Context) {
 func (h *OrganisationHandler) getAll(ctx *gin.Context) {
 	records, err := h.organisationService.GetAll(ctx)
 	if err != nil {
+		logger.Error("failed to fetch organisations", err)
 		ctx.JSON(400, response.SendError("getting error creating organisation", err))
 		return
 	}
@@ -67,6 +72,7 @@ func (h *OrganisationHandler) getOne(ctx *gin.Context) {
 	id := ctx.Param("id")
 	record, err := h.organisationService.GetOne(ctx, id)
 	if err != nil {
+		logger.Error("organisation not found: %s", id, err)
 		ctx.JSON(400, response.SendError("cannot find organisation with id", err))
 		return
 	}

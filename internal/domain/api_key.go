@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
-	"fmt"
 	"golang.org/x/crypto/bcrypt"
 	"time"
 )
@@ -59,7 +58,6 @@ func (d *ApiKeyD) HashKey() error {
 	}
 	d.Key = string(hashedBytes)
 
-	fmt.Printf("hashed for key %s is %s\n", d.Key, string(hashedBytes))
 	return nil
 }
 

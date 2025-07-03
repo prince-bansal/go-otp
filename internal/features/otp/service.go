@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/prince-bansal/go-otp/internal/domain"
 	"github.com/prince-bansal/go-otp/internal/features/api_key"
+	"github.com/prince-bansal/go-otp/pkg/logger"
 )
 
 type OtpService interface {
@@ -34,6 +35,7 @@ func (s *impl) GenerateOtp(ctx context.Context, req *domain.OtpGenerateRequest) 
 	d.Otp = d.GenerateOtp()
 	record, err := s.repository.Insert(ctx, &d)
 	if err != nil {
+		logger.Error("failed to save otp", err)
 		return nil, err
 	}
 
@@ -50,9 +52,19 @@ func (s *impl) VerifyOtp(ctx context.Context, req *domain.OtpVerifyRequest) (boo
 		MobileNo:       req.MobileNo,
 	}
 
-	return s.repository.Verify(ctx, &d)
+	success, err := s.repository.Verify(ctx, &d)
+	if err != nil {
+		logger.Error("invalid credentials", err)
+		return false, nil
+	}
+	return success, nil
 }
 
 func (s *impl) CleanOtps(ctx context.Context) (bool, error) {
-	return s.repository.DeleteExpired(ctx)
+	success, err := s.repository.DeleteExpired(ctx)
+	if err != nil {
+		logger.Error("failed to delete expired otps", err)
+		return false, nil
+	}
+	return success, nil
 }

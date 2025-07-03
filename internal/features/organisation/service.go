@@ -3,6 +3,7 @@ package organisation
 import (
 	"context"
 	"github.com/prince-bansal/go-otp/internal/domain"
+	"github.com/prince-bansal/go-otp/pkg/logger"
 )
 
 type OrganisationService interface {
@@ -25,6 +26,7 @@ type OrganisationServiceImpl struct {
 func (s *OrganisationServiceImpl) GetAll(ctx context.Context) ([]*domain.OrganisationD, error) {
 	records, err := s.organisationRepository.GetAll(ctx)
 	if err != nil {
+		logger.Error("failed to fetch organisations", err)
 		return nil, err
 	}
 	return records, nil
@@ -33,6 +35,7 @@ func (s *OrganisationServiceImpl) GetAll(ctx context.Context) ([]*domain.Organis
 func (s *OrganisationServiceImpl) GetOne(ctx context.Context, id string) (*domain.OrganisationD, error) {
 	record, err := s.organisationRepository.GetOne(ctx, id)
 	if err != nil {
+		logger.Error("organisation not found for id %s", id, err)
 		return nil, err
 	}
 	return record, nil
@@ -41,6 +44,7 @@ func (s *OrganisationServiceImpl) GetOne(ctx context.Context, id string) (*domai
 func (s *OrganisationServiceImpl) Register(ctx context.Context, request *domain.OrganisationD) (*domain.OrganisationD, error) {
 	createdRecord, err := s.organisationRepository.Register(ctx, request)
 	if err != nil {
+		logger.Error("failed to save organisation", err)
 		return nil, err
 	}
 	return createdRecord, nil
@@ -49,6 +53,7 @@ func (s *OrganisationServiceImpl) Register(ctx context.Context, request *domain.
 func (s *OrganisationServiceImpl) GetByApiKey(ctx context.Context, api string) (*domain.OrganisationD, error) {
 	record, err := s.organisationRepository.GetByApiKey(ctx, api)
 	if err != nil {
+		logger.Error("organisation not found with api key %s", api, err)
 		return nil, err
 	}
 	return record, nil
