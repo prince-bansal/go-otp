@@ -1,6 +1,7 @@
 package db
 
 import (
+	"errors"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang-migrate/migrate/v4"
@@ -34,9 +35,9 @@ func NewStore(config *config.Config) *Store {
 		Logger: logger.Default.LogMode(logger.Info),
 	})
 	if err != nil {
-		fmt.Println("getting error establishing db connection", err.Error())
+		fmt.Println("failed to establish connection with db", err.Error())
 	} else {
-		fmt.Println("connected with db")
+		fmt.Println("hola: connected with db")
 	}
 	db = dbInstance
 	return &Store{
@@ -50,18 +51,14 @@ func (s *Store) Migrate() {
 
 	sqlDB, err := db.DB()
 	if err != nil {
-		fmt.Println("getting error getting sql instance", err.Error())
+		fmt.Println("failed to initialise db", err.Error())
 		return
 	}
 
 	driver, _ := migrateSql.WithInstance(sqlDB, &migrateSql.Config{})
-
 	cwd, _ := os.Getwd()
-
 	migrationPath := filepath.Join(cwd, "store/migrations")
-	fmt.Println(">>>migrationPath ", migrationPath)
 	absPath, _ := filepath.Abs(migrationPath)
-	fmt.Println("abs path", absPath)
 	m, err := migrate.NewWithDatabaseInstance(
 		"file://"+absPath,
 		"mysql",
@@ -69,15 +66,18 @@ func (s *Store) Migrate() {
 	)
 
 	if err != nil {
-		fmt.Println("not able to get migration path", err.Error())
+		fmt.Println("failed to get migration path", err.Error())
 		return
 	}
 
 	err = m.Up()
 	if err != nil {
-		fmt.Println("getting error applying migrations", err.Error())
-		return
+		if errors.Is(err, migrate.ErrNoChange) {
+			fmt.Println("hola: no new migration found! Good to go")
+		} else {
+			fmt.Println("failed to apply migrations", err.Error())
+		}
 	} else {
-		fmt.Println("migrations ran successfully!")
+		fmt.Println("hola: migrations run successfully!")
 	}
 }
